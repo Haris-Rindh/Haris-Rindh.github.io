@@ -8,6 +8,7 @@
     <meta property="og:image" id="og-image" content="">
     <meta property="og:description" id="og-description" content="Download your favorite book for free!">
     <meta property="og:url" id="og-url" content="">
+    <meta property="og:type" content="website">
     <!-- Favicon and Styles -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
     <link rel="stylesheet" href="style.css">
@@ -182,6 +183,13 @@
             document.getElementById('og-image').content = book.cover;
             document.getElementById('og-description').content = `Download "${book.title}" by ${book.author} for free on BookSphere.`;
             document.getElementById('og-url').content = window.location.href;
+
+            // Log the updated meta tags for debugging
+            console.log('Updated Open Graph Meta Tags:');
+            console.log('og:title:', document.getElementById('og-title').content);
+            console.log('og:image:', document.getElementById('og-image').content);
+            console.log('og:description:', document.getElementById('og-description').content);
+            console.log('og:url:', document.getElementById('og-url').content);
 
             // Set up the download button
             const downloadButton = document.querySelector('.link-btn3');
