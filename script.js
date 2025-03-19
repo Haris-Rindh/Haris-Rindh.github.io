@@ -8,7 +8,7 @@ async function fetchBooks() {
 // Display books on page load
 document.addEventListener('DOMContentLoaded', async () => {
     const books = await fetchBooks();
-    const bestsellers = books.slice(0, 12); // Example: Use the first 12 books as bestsellers
+    const bestsellers = books.slice(0, 20); // Example: Use the first 20 books as bestsellers
     displayBooks(books, 'featured-books');
     displayBooks(bestsellers, 'bestseller-books');
     updateCategories();
@@ -42,8 +42,11 @@ function createBookCard(book) {
         <div class="book-info">
             <h3 class="book-title">${book.title}</h3>
             <p class="book-author">by ${book.author}</p>
-            <button class="download-btn" onclick="redirectToDownloadPage(${book.id})">Download</button>
-            <button class="share-btn" onclick="shareBook(${book.id})">Share</button>
+            <div class="button-container">
+                <button class="download-btn" onclick="window.open('download.html?bookId=${book.id}', '_blank')">Download</button>
+                <button class="share-btn" onclick="shareBook(${book.id})">➥</button>
+                <button class="read-online-btn" onclick="window.open('read.html?bookId=${book.id}', '_blank')">Read online</button>
+            </div>
         </div>
     `;
     
@@ -53,6 +56,10 @@ function createBookCard(book) {
 // Redirect to the download page
 function redirectToDownloadPage(bookId) {
     window.location.href = `download.html?bookId=${bookId}`;
+}
+
+function redirectToReadingPage(bookId) {
+    window.location.href = `read.html?bookId=${bookId}`;
 }
 
 // Share the download page link
@@ -116,15 +123,32 @@ function updateCategories() {
     });
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const categories = document.getElementById('categories');
+    const categoriesContainer = document.createElement('div');
+    categoriesContainer.className = 'categories';
+
+    // Move all child nodes of categories to the container
+    while (categories.firstChild) {
+        categoriesContainer.appendChild(categories.firstChild);
+    }
+
+    // Append the container back to the categories div
+    categories.appendChild(categoriesContainer);
+
+    // Duplicate the categories for seamless scrolling
+    categoriesContainer.innerHTML += categoriesContainer.innerHTML;
+});
+
 // Filter books by category
 function filterBooksByCategory(category, books) {
     const filteredBooks = category === 'All Books' 
         ? books 
-        : books.filter(book => book.category === category);
+        : books.filter(book => book.categories.includes(category));
     
     const filteredBestsellers = category === 'All Books' 
-        ? books.slice(0, 12) 
-        : books.filter(book => book.category === category).slice(0, 12);
+        ? books.slice(0, 20) 
+        : books.filter(book => book.categories.includes(category)).slice(0, 20);
     
     displayBooks(filteredBooks, 'featured-books');
     displayBooks(filteredBestsellers, 'bestseller-books');
@@ -151,7 +175,7 @@ function setupSearch() {
                 book.title.toLowerCase().includes(query) ||
                 book.author.toLowerCase().includes(query) ||
                 book.id.toString().includes(query) // Search by ID
-            ).slice(0, 12);
+            ).slice(0, 20);
 
             displayBooks(filteredBooks, 'featured-books');
             displayBooks(filteredBestsellers, 'bestseller-books');
@@ -164,7 +188,7 @@ function setupSearch() {
             }
         } else {
             displayBooks(books, 'featured-books');
-            displayBooks(books.slice(0, 12), 'bestseller-books');
+            displayBooks(books.slice(0, 20), 'bestseller-books');
             searchMessage.textContent = ''; // Clear the message
         }
     };
@@ -190,22 +214,19 @@ function setupMenuToggle() {
     });
 }
 
-// Pagination
 let currentPage = 1;
-const booksPerPage = 12; // Number of books to display per page
+const booksPerPage = 30;
+const maxVisiblePages = 4; // Number of visible page buttons
 
 async function displayBooksWithPagination() {
     const books = await fetchBooks();
     const totalPages = Math.ceil(books.length / booksPerPage);
 
-    // Display books for the current page
     const startIndex = (currentPage - 1) * booksPerPage;
     const endIndex = startIndex + booksPerPage;
     const booksToDisplay = books.slice(startIndex, endIndex);
 
     displayBooks(booksToDisplay, 'featured-books');
-
-    // Update pagination buttons
     updatePaginationButtons(totalPages);
 }
 
@@ -213,44 +234,84 @@ function updatePaginationButtons(totalPages) {
     const pageNumbers = document.getElementById('page-numbers');
     pageNumbers.innerHTML = '';
 
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i;
-        button.addEventListener('click', () => {
-            currentPage = i;
-            displayBooksWithPagination();
-        });
+    // Calculate the range of visible page numbers
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-        if (i === currentPage) {
-            button.classList.add('active');
-        }
-
-        pageNumbers.appendChild(button);
+    // Adjust startPage if endPage is at the limit
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // Enable/disable Previous and Next buttons
+    // Add "Previous" button
     const prevButton = document.getElementById('prev-page');
-    const nextButton = document.getElementById('next-page');
-
     prevButton.disabled = currentPage === 1;
+
+    // Add page numbers
+    if (startPage > 1) {
+        const firstPageButton = createPageButton(1);
+        pageNumbers.appendChild(firstPageButton);
+
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            pageNumbers.appendChild(ellipsis);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = createPageButton(i);
+        if (i === currentPage) {
+            pageButton.classList.add('active');
+        }
+        pageNumbers.appendChild(pageButton);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            pageNumbers.appendChild(ellipsis);
+        }
+
+        const lastPageButton = createPageButton(totalPages);
+        pageNumbers.appendChild(lastPageButton);
+    }
+
+    // Add "Next" button
+    const nextButton = document.getElementById('next-page');
     nextButton.disabled = currentPage === totalPages;
-
-    prevButton.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            displayBooksWithPagination();
-        }
-    });
-
-    nextButton.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            displayBooksWithPagination();
-        }
-    });
 }
 
-// Call the function on page load
+function createPageButton(pageNumber) {
+    const button = document.createElement('button');
+    button.textContent = pageNumber;
+    button.addEventListener('click', () => {
+        currentPage = pageNumber;
+        displayBooksWithPagination();
+    });
+    return button;
+}
+
+// Event listeners for "Previous" and "Next" buttons
+document.getElementById('prev-page').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        displayBooksWithPagination();
+    }
+});
+
+document.getElementById('next-page').addEventListener('click', async () => {
+    const books = await fetchBooks();
+    const totalPages = Math.ceil(books.length / booksPerPage);
+
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayBooksWithPagination();
+    }
+});
+
+// Initialize pagination on page load
 document.addEventListener('DOMContentLoaded', () => {
     displayBooksWithPagination();
 });
