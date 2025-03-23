@@ -367,3 +367,27 @@ function updateThemeIcon(theme) {
 document.addEventListener('DOMContentLoaded', () => {
     setupThemeToggle();
 });
+
+function updateMetaTags(book) {
+    document.querySelector('meta[property="og:title"]').setAttribute("content", book.title);
+    document.querySelector('meta[property="og:description"]').setAttribute("content", `Read and download ${book.title} by ${book.author}.`);
+    document.querySelector('meta[property="og:image"]').setAttribute("content", book.cover);
+    document.querySelector('meta[property="og:url"]').setAttribute("content", window.location.href);
+}
+
+async function displayBookPreview() {
+    const books = await fetchBooks();
+    const book = books.find(b => b.id == bookId);
+    if (!book) {
+        document.getElementById('book-preview-container').innerHTML = '<p>Book not found.</p>';
+        return;
+    }
+    
+    document.getElementById('book-cover').src = book.cover;
+    document.getElementById('book-title').textContent = book.title;
+    document.getElementById('book-author').textContent = `by ${book.author}`;
+    document.getElementById('download-link').href = book.downloadLink;
+    document.getElementById('book-preview').src = book.embedLink;
+    
+    updateMetaTags(book); // **Call this function to update meta tags dynamically**
+}

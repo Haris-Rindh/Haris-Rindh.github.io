@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Read a preview of the book and download it for free. Find books on self-help, education, and more.">
+    <meta name="keywords" content="books, free books, book preview, download books, self-help books, education books">
+    <meta name="author" content="Harinova Digital">
+    <meta property="og:title" content="Book Preview">
+    <meta property="og:description" content="Read and download books for free.">
+    <meta property="og:image" content="default-book-image.jpg">
+    <meta property="og:url" content="https://yourwebsite.com/book-preview.html">
+    <meta name="twitter:card" content="summary_large_image">
     <title>Book Preview</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
 <body>
     <header>
@@ -27,16 +36,24 @@
     <script>
         // Get book ID from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const bookId = urlParams.get('bookId');
+        const bookId = parseInt(urlParams.get('bookId')); // ✅ Convert to integer
 
         async function fetchBooks() {
-            const response = await fetch('books.json');
-            return await response.json();
+            try {
+                const response = await fetch('books.json'); // ✅ Ensure correct path
+                if (!response.ok) throw new Error('Failed to load books.json');
+                return await response.json();
+            } catch (error) {
+                console.error('Error loading books:', error);
+                document.getElementById('book-preview-container').innerHTML = '<p>Failed to load books.</p>';
+            }
         }
 
         async function displayBookPreview() {
             const books = await fetchBooks();
-            const book = books.find(b => b.id == bookId);
+            if (!books) return;
+
+            const book = books.find(b => b.id === bookId); // ✅ Use `===` for number comparison
             if (!book) {
                 document.getElementById('book-preview-container').innerHTML = '<p>Book not found.</p>';
                 return;
@@ -51,5 +68,6 @@
 
         document.addEventListener('DOMContentLoaded', displayBookPreview);
     </script>
+    <script src="script.js"></script>
 </body>
 </html>
