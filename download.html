@@ -4,24 +4,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Default meta tags -->
-    <meta property="og:site_name" content="Book Sphere" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-
-    <!-- Dynamic meta tags (will be updated via JavaScript) -->
-    <meta property="og:title" content="Book Sphere - Download your free Book" id="og-title" />
-    <meta property="og:description" content="Download your favorite books for free!" id="og-description" />
-    <meta property="og:image" content="https://yourwebsite.com/default-cover.jpg" id="og-image" />
-    <meta property="og:url" content="https://yourwebsite.com" id="og-url" />
-
-    <meta name="twitter:title" content="Book Sphere - Download your free Book" id="twitter-title" />
-    <meta name="twitter:description" content="Download your favorite books for free!" id="twitter-description" />
-    <meta name="twitter:image" content="https://yourwebsite.com/default-cover.jpg" id="twitter-image" />
+    <!-- Open Graph Meta Tags (Dynamically Updated) -->
+    <meta property="og:title" id="og-title" content="BookSphere - Download Your Book">
+    <meta property="og:image" id="og-image" content="">
+    <meta property="og:description" id="og-description" content="Download your favorite book for free!">
+    <meta property="og:url" id="og-url" content="">
+    <meta property="og:type" content="website">
+    <!-- Favicon and Styles -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <link rel="stylesheet" href="style.css">
     <!-- Favicon and Styles -->
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>" />
-    <link rel="stylesheet" href="style.css" />
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>" />>
     <title>Download Page</title>
 </head>
 
@@ -174,53 +168,61 @@
     <script src="script.js"></script>
 
     <script>
-         function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
-    }
-
-    // Fetch book data based on the bookId
-    async function fetchBookById(bookId) {
-        const response = await fetch("books.json");
-        const books = await response.json();
-        return books.find((book) => book.id === parseInt(bookId));
-    }
-
-    // Display the selected book and update Open Graph meta tags
-    async function displaySelectedBook() {
-        const bookId = getQueryParam("bookId");
-        if (!bookId) {
-            alert("No book selected. Redirecting to home page.");
-            window.location.href = "index.html";
-            return;
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
         }
 
-        const book = await fetchBookById(bookId);
-        if (!book) {
-            alert("Book not found. Redirecting to home page.");
-            window.location.href = "index.html";
-            return;
+        // Fetch book data based on the bookId
+        async function fetchBookById(bookId) {
+            const response = await fetch('books.json');
+            const books = await response.json();
+            return books.find(book => book.id === parseInt(bookId));
         }
 
-        // Update the book details on the page
-        document.querySelector(".download-book .title").textContent = book.title;
-        document.querySelector(".download-book .book-cover").src = book.cover;
-        document.querySelector(".download-book .quote").textContent = `BookSphere provides you the free PDF of "${book.title}". Click below to download.`;
+        // Display the selected book and update Open Graph meta tags
+        async function displaySelectedBook() {
+            const bookId = getQueryParam('bookId');
+            if (!bookId) {
+                alert('No book selected. Redirecting to home page.');
+                window.location.href = 'index.html';
+                return;
+            }
 
-        // Update Open Graph meta tags
-        document.getElementById("og-title").content = book.title;
-        document.getElementById("og-image").content = book.cover;
-        document.getElementById("og-description").content = `Download "${book.title}" by ${book.author} for free on BookSphere.`;
-        document.getElementById("og-url").content = window.location.href;
+            const book = await fetchBookById(bookId);
+            if (!book) {
+                alert('Book not found. Redirecting to home page.');
+                window.location.href = 'index.html';
+                return;
+            }
 
-        // Update Twitter Card meta tags
-        document.getElementById("twitter-title").content = book.title;
-        document.getElementById("twitter-image").content = book.cover;
-        document.getElementById("twitter-description").content = `Download "${book.title}" by ${book.author} for free on BookSphere.`;
-    }
+            // Update the book details on the page
+            document.querySelector('.download-book .title').textContent = book.title;
+            document.querySelector('.download-book .book-cover').src = book.cover;
+            document.querySelector('.download-book .quote').textContent = `BookSphere provides you the free PDF of "${book.title}". Click below to download.`;
 
-    // Call the function on page load
-    document.addEventListener("DOMContentLoaded", displaySelectedBook);
+            // Update Open Graph meta tags
+            document.getElementById('og-title').content = book.title;
+            document.getElementById('og-image').content = book.cover;
+            document.getElementById('og-description').content = `Download "${book.title}" by ${book.author} for free on BookSphere.`;
+            document.getElementById('og-url').content = window.location.href;
+
+            // Log the updated meta tags for debugging
+            console.log('Updated Open Graph Meta Tags:');
+            console.log('og:title:', document.getElementById('og-title').content);
+            console.log('og:image:', document.getElementById('og-image').content);
+            console.log('og:description:', document.getElementById('og-description').content);
+            console.log('og:url:', document.getElementById('og-url').content);
+
+            // Set up the download button
+            const downloadButton = document.querySelector('.link-btn3');
+            downloadButton.onclick = () => {
+                startDownloadTimer(book.downloadLink);
+            };
+        }
+
+        // Call the function on page load
+        document.addEventListener('DOMContentLoaded', displaySelectedBook);
 
         // Start the download timer
         function startDownloadTimer(downloadLink) {
