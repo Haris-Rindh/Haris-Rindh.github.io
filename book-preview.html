@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Preview</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Book Preview</h1>
+        <a href="index.html">Back to Home</a>
+    </header>
+    
+    <main id="book-preview-container">
+        <div id="book-info">
+            <img id="book-cover" src="" alt="Book Cover">
+            <h2 id="book-title"></h2>
+            <p id="book-author"></p>
+            <div class="buttons">
+                <a id="download-link" href="#" target="_blank" class="button">Download</a>
+            </div>
+        </div>
+        <iframe id="book-preview" src="" frameborder="0"></iframe>
+    </main>
+    
+    <script>
+        // Get book ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('bookId');
+
+        async function fetchBooks() {
+            const response = await fetch('books.json');
+            return await response.json();
+        }
+
+        async function displayBookPreview() {
+            const books = await fetchBooks();
+            const book = books.find(b => b.id == bookId);
+            if (!book) {
+                document.getElementById('book-preview-container').innerHTML = '<p>Book not found.</p>';
+                return;
+            }
+
+            document.getElementById('book-cover').src = book.cover;
+            document.getElementById('book-title').textContent = book.title;
+            document.getElementById('book-author').textContent = `by ${book.author}`;
+            document.getElementById('download-link').href = book.downloadLink;
+            document.getElementById('book-preview').src = book.embedLink;
+        }
+
+        document.addEventListener('DOMContentLoaded', displayBookPreview);
+    </script>
+</body>
+</html>

@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>About Us - Book Library</title>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- Header -->
@@ -133,6 +136,38 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="script.js"></script> <!-- Link to your existing JavaScript file -->
+    <script src="script.js"></script>
+    <script>
+        // Function to toggle between light and dark themes
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+    
+            // Check user's preferred theme from localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                body.classList.add(savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+    
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                const isDarkTheme = body.classList.contains('dark-theme');
+                localStorage.setItem('theme', isDarkTheme ? 'dark-theme' : 'light-theme');
+                updateThemeIcon(isDarkTheme ? 'dark-theme' : 'light-theme');
+            });
+        }
+    
+        // Function to update the theme icon
+        function updateThemeIcon(theme) {
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.textContent = theme === 'dark-theme' ? '☀️' : '🌙';
+        }
+    
+        // Call the function on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setupThemeToggle();
+        });
+    </script>
 </body>
 </html>
