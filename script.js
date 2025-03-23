@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function displayBooks(bookList, sectionId) {
     const booksElement = document.getElementById(sectionId);
     booksElement.innerHTML = '';
-    
+
     bookList.forEach(book => {
         const bookCard = createBookCard(book);
         booksElement.appendChild(bookCard);
@@ -31,7 +31,7 @@ function displayBooks(bookList, sectionId) {
 function createBookCard(book) {
     const bookCard = document.createElement('div');
     bookCard.className = 'book-card';
-    
+
     bookCard.innerHTML = `
         <div class="book-cover">
             <div class="download-cover-btn" title="Download Cover" onclick="downloadCover('${book.cover}', '${book.title}')">
@@ -49,7 +49,7 @@ function createBookCard(book) {
             </div>
         </div>
     `;
-    
+
     return bookCard;
 }
 
@@ -73,8 +73,8 @@ function shareBook(bookId) {
             title: 'Check out this book!',
             url: downloadPageLink,
         })
-        .then(() => console.log('Shared successfully'))
-        .catch((error) => console.error('Error sharing:', error));
+            .then(() => console.log('Shared successfully'))
+            .catch((error) => console.error('Error sharing:', error));
     } else {
         // Fallback: Copy link to clipboard
         navigator.clipboard.writeText(downloadPageLink)
@@ -107,15 +107,15 @@ function downloadCover(coverUrl, title) {
 // Handle category filtering
 function updateCategories() {
     const categories = document.querySelectorAll('.category');
-    
+
     categories.forEach(category => {
         category.addEventListener('click', async () => {
             // Remove active class from all categories
             categories.forEach(cat => cat.classList.remove('active'));
-            
+
             // Add active class to clicked category
             category.classList.add('active');
-            
+
             const selectedCategory = category.textContent;
             const books = await fetchBooks();
             filterBooksByCategory(selectedCategory, books);
@@ -142,14 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Filter books by category
 function filterBooksByCategory(category, books) {
-    const filteredBooks = category === 'All Books' 
-        ? books 
+    const filteredBooks = category === 'All Books'
+        ? books
         : books.filter(book => book.categories.includes(category));
-    
-    const filteredBestsellers = category === 'All Books' 
-        ? books.slice(0, 20) 
+
+    const filteredBestsellers = category === 'All Books'
+        ? books.slice(0, 20)
         : books.filter(book => book.categories.includes(category)).slice(0, 20);
-    
+
     displayBooks(filteredBooks, 'featured-books');
     displayBooks(filteredBestsellers, 'bestseller-books');
 }
@@ -165,13 +165,13 @@ function setupSearch() {
         const books = await fetchBooks();
 
         if (query) {
-            const filteredBooks = books.filter(book => 
+            const filteredBooks = books.filter(book =>
                 book.title.toLowerCase().includes(query) ||
                 book.author.toLowerCase().includes(query) ||
                 book.id.toString().includes(query) // Search by ID
             );
 
-            const filteredBestsellers = books.filter(book => 
+            const filteredBestsellers = books.filter(book =>
                 book.title.toLowerCase().includes(query) ||
                 book.author.toLowerCase().includes(query) ||
                 book.id.toString().includes(query) // Search by ID
@@ -208,7 +208,7 @@ function setupSearch() {
 function setupMenuToggle() {
     const menuToggle = document.getElementById('menu-toggle');
     const navLinks = document.getElementById('nav-links');
-    
+
     menuToggle.addEventListener('click', () => {
         navLinks.classList.toggle('active');
     });
@@ -368,26 +368,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setupThemeToggle();
 });
 
-function updateMetaTags(book) {
-    document.querySelector('meta[property="og:title"]').setAttribute("content", book.title);
-    document.querySelector('meta[property="og:description"]').setAttribute("content", `Read and download ${book.title} by ${book.author}.`);
-    document.querySelector('meta[property="og:image"]').setAttribute("content", book.cover);
-    document.querySelector('meta[property="og:url"]').setAttribute("content", window.location.href);
+function updateMetaTags(bookId) {
+    // Fetch book data from your JSON file
+    const book = booksData.find(book => book.id === bookId);
+
+    if (book) {
+        // Update Open Graph tags
+        document.getElementById('og-title').setAttribute('content', `Book Sphere - ${book.title}`);
+        document.getElementById('og-description').setAttribute('content', `Download "${book.title}" for free!`);
+        document.getElementById('og-image').setAttribute('content', book.cover);
+        document.getElementById('og-url').setAttribute('content', `https://yourwebsite.com/download/${book.id}`);
+
+        // Update Twitter Card tags
+        document.getElementById('twitter-title').setAttribute('content', `Book Sphere - ${book.title}`);
+        document.getElementById('twitter-description').setAttribute('content', `Download "${book.title}" for free!`);
+        document.getElementById('twitter-image').setAttribute('content', book.cover);
+    }
 }
 
-async function displayBookPreview() {
-    const books = await fetchBooks();
-    const book = books.find(b => b.id == bookId);
-    if (!book) {
-        document.getElementById('book-preview-container').innerHTML = '<p>Book not found.</p>';
-        return;
-    }
-    
-    document.getElementById('book-cover').src = book.cover;
-    document.getElementById('book-title').textContent = book.title;
-    document.getElementById('book-author').textContent = `by ${book.author}`;
-    document.getElementById('download-link').href = book.downloadLink;
-    document.getElementById('book-preview').src = book.embedLink;
-    
-    updateMetaTags(book); // **Call this function to update meta tags dynamically**
-}
+// Example: Call this function when the share button is clicked
+document.querySelector('.share-button').addEventListener('click', () => {
+    const bookId = // Get the book ID from the clicked element
+        updateMetaTags(bookId);
+});
