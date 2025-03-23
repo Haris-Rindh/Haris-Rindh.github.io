@@ -62,32 +62,44 @@ function redirectToReadingPage(bookId) {
     window.location.href = `read.html?bookId=${bookId}`;
 }
 
-// Share the download page link
 function shareBook(bookId) {
-    // Generate the download page link dynamically
-    const downloadPageLink = `${window.location.origin}/download.html?bookId=${bookId}`;
+    // Fetch book data from your JSON file
+    const book = booksData.find(book => book.id === bookId);
 
-    if (navigator.share) {
-        // Use the Web Share API if available
-        navigator.share({
-            title: 'Check out this book!',
-            url: downloadPageLink,
-        })
-            .then(() => console.log('Shared successfully'))
-            .catch((error) => console.error('Error sharing:', error));
+    if (book) {
+        // Generate the download page link dynamically
+        const downloadPageLink = `${window.location.origin}/download.html?bookId=${bookId}`;
+
+        // Update Open Graph meta tags
+        document.getElementById('og-title').setAttribute('content', `Book Sphere - ${book.title}`);
+        document.getElementById('og-description').setAttribute('content', `Download "${book.title}" for free!`);
+        document.getElementById('og-image').setAttribute('content', book.cover);
+        document.getElementById('og-url').setAttribute('content', downloadPageLink);
+
+        // Update Twitter Card meta tags
+        document.getElementById('twitter-title').setAttribute('content', `Book Sphere - ${book.title}`);
+        document.getElementById('twitter-description').setAttribute('content', `Download "${book.title}" for free!`);
+        document.getElementById('twitter-image').setAttribute('content', book.cover);
+
+        // Share the link
+        if (navigator.share) {
+            // Use the Web Share API if available
+            navigator.share({
+                title: `Book Sphere - ${book.title}`,
+                text: `Download "${book.title}" for free!`,
+                url: downloadPageLink,
+            })
+                .then(() => console.log('Shared successfully'))
+                .catch((error) => console.error('Error sharing:', error));
+        } else {
+            // Fallback: Copy link to clipboard
+            navigator.clipboard.writeText(downloadPageLink)
+                .then(() => alert('Link copied to clipboard!'))
+                .catch(() => alert('Failed to copy link.'));
+        }
     } else {
-        // Fallback: Copy link to clipboard
-        navigator.clipboard.writeText(downloadPageLink)
-            .then(() => alert('Link copied to clipboard!'))
-            .catch(() => alert('Failed to copy link.'));
+        console.error('Book not found!');
     }
-}
-
-// Copy link (optional, if needed elsewhere)
-function copyLink(link) {
-    navigator.clipboard.writeText(link)
-        .then(() => alert('Link copied to clipboard!'))
-        .catch(() => alert('Failed to copy link.'));
 }
 
 function downloadCover(coverUrl, title) {
